@@ -7,9 +7,49 @@ import torch.nn as nn
 import numpy as np
 import math 
 from timm.models.vision_transformer import PatchEmbed,Attention,Mlp 
+from typing import Tuple
 
-def modulate(x,shift,scale):
+def modulate(x:torch.Tensor,shift:torch.Tensor,scale:torch.Tensor):
     return x*(1+scale.unsqueeze(1))+shift.unsqueeze(1)
+
+def get_1d_sincos_pos_embed_from_grid(embed_dim, pos):
+    assert embed_dim % 2 == 0
+    omega = np.arange(embed_dim // 2, dtype=np.float64)
+    omega /= embed_dim / 2.
+    omega = 1. / 10000**omega  # (D/2,)
+
+    pos = pos.reshape(-1)  # (M,)
+    out = np.einsum('m,d->md', pos, omega)  # (M, D/2), outer product
+
+    emb_sin = np.sin(out) # (M, D/2)
+    emb_cos = np.cos(out) # (M, D/2)
+
+    emb = np.concatenate([emb_sin, emb_cos], axis=1)  # (M, D)
+    return emb
+
+def get_2d_sincos_pos_embed_from_grid(embed_dim, grid):
+    assert embed_dim % 2 == 0
+
+    emb_h = get_1d_sincos_pos_embed_from_grid(embed_dim // 2, grid[0])  # (H*W, D/2)
+    emb_w = get_1d_sincos_pos_embed_from_grid(embed_dim // 2, grid[1])  # (H*W, D/2)
+
+    emb = np.concatenate([emb_h, emb_w], axis=1) # (H*W, D)
+    return emb
+
+def get_2d_sincos_pos_emb(emb_dim:int,grid_size:Tuple[int,int],cls_token:bool=False,extra_tokens:int=0):
+    '''
+        :return:
+    '''
+    grid_h=np.arange(grid_size,dtype=np.float32)    #高度方向坐标
+    grid_w=np.arange(grid_size,dtype=np.float32)    #宽度方向坐标
+    grid=np.meshgrid(grid_w,grid_h) #生成网格坐标矩阵，形状为[2,grid_szie,grid_size]
+    grid=np.stack(grid,axis=0)
+
+    grid=grid.reshape([2,1,grid_size,grid_size])
+    pos_emb=get_2d_sincos_pos_embed_from_grid(emb_dim,grid)
+    if cls_token and extra_tokens>0:
+        pos_emb=np.concatenate([np.zeros([extra_tokens, emb_dim]), pos_emb], axis=0)
+    return  pos_emb
 
 class TimeStepEmbedder(nn.Module):
     def __init__(
@@ -159,6 +199,9 @@ class DiT(nn.Module):
         self.apply(_basic_init)
 
         # Init: pos_emb
+        pos_emb=get_2d_sincos_pos_emb(self.pos_embed.shape[-1],
+                                      int(self.x_embedder.num_patches**0.5))
+        self.pos_embed.data.copy_(torch.from_numpy(pos_emb).float().unsqueeze(0))
 
         # Init: patch_emb
         w=self.x_embedder.proj.weight.data
