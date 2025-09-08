@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
-import wandb
+# import wandb
 from torchvision import datasets,transforms
 
-from models.UNet import UNetModel
+from models.UNet import UNetModel2
 from DDIM.ddim import GaussianDiffusion
 from Utils.plotting import plot_image_grid
 
@@ -27,12 +27,12 @@ dataset=datasets.MNIST('/Data',train=True,download=True,transform=transform)
 train_loader=torch.utils.data.DataLoader(dataset,batch_size,shuffle=True)
 
 # Load: Model
-model=UNetModel(
+model=UNetModel2(
     in_channels=1,
     model_channels=96,
     out_channels=1,
     channel_mult=(1,2,2),
-    attention_resolution=[]
+    attention_resolutions=[]
 )
 model.to(device)
 
@@ -43,17 +43,17 @@ optimizer=torch.optim.Adam(model.parameters(),lr=5e-4)
 images:torch.Tensor
 epoch_loss:float
 
-wandb.init(
-    project='ddim-mnist',
-    config={
-        "batch_size":batch_size,
-        "timesteps":timesteps,
-        "epochs":epochs,
-        "lr":5e-4,
-        "model_channels":96,
-    }
-)
-wandb.watch(model,log='all')
+# wandb.init(
+#     project='ddim-mnist',
+#     config={
+#         "batch_size":batch_size,
+#         "timesteps":timesteps,
+#         "epochs":epochs,
+#         "lr":5e-4,
+#         "model_channels":96,
+#     }
+# )
+# wandb.watch(model,log='all')
 
 for epoch in tqdm(range(epochs)):
     epoch_loss=0.0
@@ -74,14 +74,14 @@ for epoch in tqdm(range(epochs)):
 
         epoch_loss+=loss.item()
         global_step=epoch*len(train_loader)+step
-        wandb.log({
-            'train/loss':loss.item(),
-            'epoch':epoch,
-            'step':global_step
-        })
+        # wandb.log({
+        #     'train/loss':loss.item(),
+        #     'epoch':epoch,
+        #     'step':global_step
+        # })
     
     avg_loss=epoch_loss/len(train_loader)
-    wandb.log({'train/epoch_loss':avg_loss,'epoch':epoch})
+    # wandb.log({'train/epoch_loss':avg_loss,'epoch':epoch})
 
 
 # Visualize Sampled Pics
@@ -95,7 +95,7 @@ for n_row in range(8):
         image_data=(p_sampled_pics[n_row,n_col]+1.)*255/2
         f_ax.imshow(image_data,cmap='gray')
         f_ax.axis('off')
-wandb.log({'generaed_samples/p_sample':wandb.Image(fig)})
+# wandb.log({'generaed_samples/p_sample':wandb.Image(fig)})
 # DDIM sample
 ddim_sampled_pics=gaussian_diffusion.ddim_sample(model,28,batch_size=64,channels=1)
 fig=plt.figure(figsize=(12,12),constrained_layout=True)
@@ -106,9 +106,9 @@ for n_row in range(8):
         image_data=(ddim_sampled_pics[n_row,n_col]+1.)*255/2
         f_ax.imshow(image_data,cmap='gray')
         f_ax.axis('off')
-wandb.log({'generaed_samples/ddim_sample':wandb.Image(fig)})
+# wandb.log({'generaed_samples/ddim_sample':wandb.Image(fig)})
 
-wandb.finish()
+# wandb.finish()
 
 
         
