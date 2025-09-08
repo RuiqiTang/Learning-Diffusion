@@ -5,7 +5,7 @@ from abc import abstractmethod
 import math 
 from typing import Tuple
 
-def timestep_embedding(timesteps:torch.Tensor,dim:int,max_period:int=10000):
+def timestep_embedding(timesteps:int,dim:int,max_period:int=10000):
     '''
         shape of timesteps: [N]
         shape of return: [N,dim]
