@@ -122,7 +122,7 @@ class GaussianDiffusion:
         device=next(model.parameters()).device
         img=torch.randn(shape,device=device)    # Start from noise
         img_list=[]
-        for i in tqdm(reversed(0,self.timesteps),desc="Sampling Loop"):
+        for i in tqdm(reversed(range(0,self.timesteps)),desc="Sampling Loop"):
             img=self.p_sample(model,img,torch.full((batch_size,), i, device=device, dtype=torch.long))
             img_list.append(img.cpu().numpy())
         return  img_list
