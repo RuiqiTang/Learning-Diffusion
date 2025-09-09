@@ -2,7 +2,7 @@
 
 [[Ref:ddim](https://github.com/ermongroup/ddim)][[Ref:diffusers](https://github.com/huggingface/diffusers/blob/main/src/diffusers/schedulers/scheduling_ddim.py)]
 
-## Training on MNNIST
+## Training on MNIST
 
 [[Wandb](https://wandb.ai/ruiqitarng-fudan-university/ddim-mnist/runs/vm5b4dvf?nw=nwuserruiqitarng)]
 
