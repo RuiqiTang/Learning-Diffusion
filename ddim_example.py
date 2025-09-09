@@ -7,7 +7,7 @@ import torch.nn.functional as F
 # import wandb
 from torchvision import datasets,transforms
 
-from models.UNet import UNetModel2
+from models.UNet2 import UNetModel
 from DDIM.ddim import GaussianDiffusion
 from Utils.plotting import plot_image_grid
 
@@ -27,7 +27,7 @@ dataset=datasets.MNIST('/Data',train=True,download=True,transform=transform)
 train_loader=torch.utils.data.DataLoader(dataset,batch_size,shuffle=True)
 
 # Load: Model
-model=UNetModel2(
+model=UNetModel(
     in_channels=1,
     model_channels=96,
     out_channels=1,
