@@ -7,9 +7,9 @@ import torch.nn.functional as F
 # import wandb
 from torchvision import datasets,transforms
 
-from models.UNet2 import UNetModel
-from DDIM.ddim import GaussianDiffusion
-from Utils.plotting import plot_image_grid
+from ddim import GaussianDiffusion
+from ..BackboneModels.UNet2 import UNetModel
+from ..Utils.plotting import plot_image_grid
 
 batch_size=64
 timesteps=500
