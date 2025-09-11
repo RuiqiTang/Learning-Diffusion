@@ -53,3 +53,34 @@ class ResBlock(nn.Module):
             x=F.avg_pool2d(x,2)
         x=F.leaky_relu(x,negative_slope=.2)
         return x
+
+class IGEBM(nn.Module):
+    def __init__(
+        self,
+        in_channels:int=1,
+        hidden_layers:int=128,
+        out_channels:int=1,
+        n_class:int=None
+    ):
+        super().__init__()
+        self.conv1=SpectralNorm().apply(nn.Conv2d(in_channels,hidden_layers,kernel_size=3,padding=1))
+        self.blocks=nn.ModuleList([
+            ResBlock(in_channels=hidden_layers,out_channels=hidden_layers,n_class=n_class,downsample=True),
+            ResBlock(in_channels=hidden_layers,out_channels=hidden_layers,n_class=n_class,downsample=False),
+            ResBlock(in_channels=hidden_layers,out_channels=hidden_layers*2,n_class=n_class,downsample=True),
+            ResBlock(in_channels=hidden_layers*2,out_channels=hidden_layers*2,n_class=n_class,downsample=False),
+            ResBlock(in_channels=hidden_layers*2,out_channels=hidden_layers*2,n_class=n_class,downsample=True),
+            ResBlock(in_channels=hidden_layers*2,out_channels=hidden_layers*2,n_class=n_class,downsample=False)
+        ])
+        self.linear=nn.Linear(hidden_layers*2,1)
+    
+    def forward(self,input:torch.Tensor,class_id=None):
+        out=self.conv1(input)
+        out=F.leaky_relu(out,negative_slope=.2)
+        for block in self.blocks:
+            out=block(out,class_id)
+        out=F.relu(out)
+        out=out.view(out.shape[0],out.shape[1],-1).sum(2)   #TODO:???
+        out=self.linear(out)
+
+        return out
