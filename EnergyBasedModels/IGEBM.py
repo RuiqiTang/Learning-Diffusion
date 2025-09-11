@@ -72,7 +72,7 @@ class IGEBM(nn.Module):
             ResBlock(in_channels=hidden_layers*2,out_channels=hidden_layers*2,n_class=n_class,downsample=True),
             ResBlock(in_channels=hidden_layers*2,out_channels=hidden_layers*2,n_class=n_class,downsample=False)
         ])
-        self.linear=nn.Linear(hidden_layers*2,1)
+        self.linear=nn.Linear(hidden_layers*2,out_channels)
     
     def forward(self,input:torch.Tensor,class_id=None):
         out=self.conv1(input)
