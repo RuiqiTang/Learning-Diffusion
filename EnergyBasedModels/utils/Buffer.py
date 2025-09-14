@@ -65,7 +65,7 @@ class SampleBuffer:
 
         reply_sample,reply_id=self.get(n_reply)
         random_samples=torch.rand(batch_size-n_reply,channels,img_size,img_size,device=device)
-        random_id=torch.randint(0,max_classes,(batch_size-img_size,),device=device)
+        random_id=torch.randint(0,max_classes,(batch_size-n_reply,),device=device)
         return  (
             torch.cat([reply_sample,random_samples],0),
             torch.cat([reply_id,random_id],0),

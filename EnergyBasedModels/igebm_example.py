@@ -17,7 +17,7 @@ import wandb
 from dotenv import load_dotenv
 load_dotenv()
 wandb_api_key=os.getenv('WANDB_API_KEY')
-wandb.login(key=wandb_api_key)
+# wandb.login(key=wandb_api_key)
 
 # Set: parameters
 batch_size=64
@@ -27,7 +27,7 @@ sample_step=60
 step_size=10
 alpha=1
 device='cuda' if torch.cuda.is_available() else 'cpu'
-wandb.init(project='mnist-igebm')
+# wandb.init(project='mnist-igebm')
 
 # Load: MNIST dataset
 transform=transforms.Compose([
@@ -36,12 +36,13 @@ transform=transforms.Compose([
 ])
 dataset=datasets.MNIST('/Data',train=True,download=True,transform=transform)
 loader=torch.utils.data.DataLoader(dataset,batch_size,shuffle=True)
-loader=tqdm(enumerate(sample_data(loader)))
 # Obtain one sample, deduce shapes
 first_batch=next(iter(loader))
 imgs,_=first_batch
 channels=imgs.shape[1]
 img_size=imgs.shape[2]
+
+loader=tqdm(enumerate(sample_data(loader)))
 
 buffer=SampleBuffer()
 noise=torch.randn(batch_size,channels,img_size,img_size,device=device)
@@ -93,7 +94,7 @@ for i,(pos_img,pos_id) in loader:
     model.zero_grad()
 
     pos_out=model(pos_img,pos_id)
-    neg_out=model(neg_img,neg_out)
+    neg_out=model(neg_img,neg_id)
 
     '''
         Construct Loss function
@@ -107,14 +108,15 @@ for i,(pos_img,pos_id) in loader:
     optimizer.step()
 
     buffer.push(neg_img,neg_id)
-    wandb.log({'loss':loss.item(),'step':i})
+    # print(i,loss.item())
+    # wandb.log({'loss':loss.item(),'step':i})
 
     if i%100==0:
         pos_to_show=pos_img[:4].detach().cpu()
         neg_to_show=neg_img[:4].detach().cpu()
 
-        wandb.log({
-            "pos_img": [wandb.Image(img, caption=f"pos_{j}") for j, img in enumerate(pos_to_show)],
-            "neg_img": [wandb.Image(img, caption=f"neg_{j}") for j, img in enumerate(neg_to_show)],
-            "step": i
-        })
+        # wandb.log({
+        #     "pos_img": [wandb.Image(img, caption=f"pos_{j}") for j, img in enumerate(pos_to_show)],
+        #     "neg_img": [wandb.Image(img, caption=f"neg_{j}") for j, img in enumerate(neg_to_show)],
+        #     "step": i
+        # })
