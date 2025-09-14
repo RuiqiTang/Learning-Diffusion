@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn 
 import torch.nn.functional as F
 
-from ..Normalization.NormalizationLayers import SpectralNorm
+from ...Normalization.NormalizationLayers import SpectralNorm
 
 class ResBlock(nn.Module):
     def __init__(self,in_channels:int,out_channels:int,n_class=None,downsample=False):

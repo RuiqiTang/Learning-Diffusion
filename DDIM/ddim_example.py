@@ -9,17 +9,17 @@ import torch.nn.functional as F
 import wandb
 from torchvision import datasets,transforms
 
-from ddim import GaussianDiffusion
-from ..BackboneModels.UNet2 import UNetModel
-from ..Utils.plotting import plot_image_grid
+from models.ddim import GaussianDiffusion
+from models.UNet import UNetModel
 
 batch_size=64
 timesteps=500
 epochs=10
 device='cuda' if torch.cuda.is_available() else 'cpu'
-wandb_api_key=os.getenv("WANDB_API_KEY")
-wandb.login(wandb_api_key)
 
+load_dotenv()
+wandb_api_key=os.getenv("WANDB_API_KEY")
+wandb.login(key=wandb_api_key)
 
 transform=transforms.Compose([
     transforms.ToTensor(),
